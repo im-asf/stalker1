@@ -3,7 +3,12 @@ import requests
 
 app = Flask(__name__)
 
-USER_AGENT = "tv.accedo.airtel.wynk/1.97.1 (Linux;Android 11) ExoPlayerLib/2.19.1"
+HEADERS = {
+    "User-Agent": "OTT Navigator",
+    "Referer": "https://m3u.ygxworld.in/",
+    "Origin": "https://m3u.ygxworld.in/",
+    "Connection": "keep-alive"
+}
 
 def modify_m3u(content):
     """ Convert DASH (.mpd) to HLS (.m3u8) and remove Kodi-specific lines """
@@ -23,13 +28,12 @@ def index():
     if not m3u_url:
         return "Error: Please provide a valid M3U URL using ?url=YOUR_M3U_LINK", 400
 
-    headers = {"User-Agent": USER_AGENT}
-    response = requests.get(m3u_url, headers=headers)
+    response = requests.get(m3u_url, headers=HEADERS)
 
     if response.status_code == 200:
         modified_content = modify_m3u(response.text)
         return Response(modified_content, mimetype="audio/x-mpegurl")
-    return f"Failed to fetch M3U (Status {response.status_code})", 500
+    return f"Failed to fetch M3U (Status {response.status_code})", response.status_code
 
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=8080)
